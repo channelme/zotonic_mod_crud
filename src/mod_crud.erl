@@ -75,7 +75,7 @@ event(#submit{message={update, Args}}, Context) ->
              _ ->
                  skip
          end
-     end || [Key, Edge] <- Empty
+     end || [Key, Edge] <- Empty, Edge =/= undefined
     ],
 
     case m_rsc:update(Id, Props, Context) of
