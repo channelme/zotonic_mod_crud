@@ -3,7 +3,6 @@
     {vsn, "git"},
     {registerered, []},
     {applications, [kernel, stdlib, zotonic_core]},
-    {mod, {z_vcs_app, []}},
     {env, []},
     {modules, []},
     {maintainers, []},
