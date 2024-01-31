@@ -25,7 +25,7 @@ Creating resources from a template with a form can be done with the
 
 Example::
 
-```djangohtml
+```django
 {% wire id=#do_event
         type="submit"
         postback={create cat="event"
@@ -63,7 +63,7 @@ Read via `m.rsc`
 
 Example::
 
-```djangohtml
+```django
 {% wire id=#do_event
         type="submit"
         postback={update id=event_id
