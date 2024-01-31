@@ -1,0 +1,15 @@
+{application, zotonic_mod_crud, [
+    {description, "Easy create, read, update and delete zotonic resources from templates."},
+    {vsn, "git"},
+    {registerered, []},
+    {applications, [kernel, stdlib, zotonic_core]},
+    {mod, {z_vcs_app, []}},
+    {env, []},
+    {modules, []},
+    {maintainers, []},
+    {licenses, ["Apache-2.0"]},
+    {links, [
+        {"GitHub", "https://github.com/channelme/zotonic_mod_crud"}
+  ]}
+]}.
+
