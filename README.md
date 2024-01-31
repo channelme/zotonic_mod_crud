@@ -18,7 +18,7 @@ Creating resources from a template with a form can be done with the
 
 | Parameter  | Description                                                            |
 |------------|------------------------------------------------------------------------|
-| cat        | The category which the new resource must get                           |
+# | cat        | The category which the new resource                                  |
 | name       | A name of a valid form fields.                                         |
 | props      | _Optional_ A pre-defined set of values the new resource must get       |
 | on_success | _Optional_ An action which will be performed after the update succeeds |
@@ -52,6 +52,8 @@ Read via `m.rsc`
 
 # Update
 
+Resources can be created with the 
+
 ## `update` postback
 
 | Parameter         | Description                                                             |
@@ -75,10 +77,20 @@ Example::
         }
         delegate="mod_crud"
 %}
+<form id="{{ #do_event }}">
+    <input name="title" type="text" value="{{ id.title }}"/>
+    <input name="dt:ymd:0:date_start" type="date" " value="{{ id.date_start | date:"Y-m-d" }}"/>
+    <input name="o.is_going" type="checkbox" value="{{ m.acl.user }}" name="o.is_going" {% if m.edge[id].is_going.[m.acl.user] %}checked{% endif %} />
+</fomr>
 ```
 
 # Delete
+
  
 ## `delete` postback
 
+| Parameter | Description                                   |
+|-----------|-----------------------------------------------|
+| id        | The id of the resource which must be deleted. |
+|
 
