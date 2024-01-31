@@ -18,7 +18,7 @@ Creating resources from a template with a form can be done with the
 
 | Parameter  | Description                                                            |
 |------------|------------------------------------------------------------------------|
-# | cat        | The category which the new resource                                  |
+| cat        | The category which the new resource                                    |
 | name       | A name of a valid form fields.                                         |
 | props      | _Optional_ A pre-defined set of values the new resource must get       |
 | on_success | _Optional_ An action which will be performed after the update succeeds |
@@ -44,11 +44,22 @@ Example::
         }
         delegate="mod_crud"
 %}
+<form id="{{ #do_event }}">
+    <input name="title" type="text"/>
+    <input name="dt:ymd:0:date_start" type="date" value="{{ now | add_week | date:"Y-m-d" }}"/>
+    <input name="o.is_going" type="checkbox" 
+           value="{{ m.acl.user }}" />
+</form>
 ```
 
-# Read
+The `name` parameters whitelist form elements send by the browser to the server. This is
+needed to be able to safely add resources to the zotonic database. When this is not done,
+anyone who has access to your web-pages can create arbitrary properties to your resources,
+which can be unsafe. 
 
-Read via `m.rsc`
+*Note* All normal text fields are autmatically escaped by Zotonic. When you display custom
+resource properties you have will to make sure those values are proper html. This can be
+done by using the [escape](https://zotonic.com/docs/1461/escape) filter.
 
 # Update
 
@@ -78,19 +89,22 @@ Example::
         delegate="mod_crud"
 %}
 <form id="{{ #do_event }}">
-    <input name="title" type="text" value="{{ id.title }}"/>
-    <input name="dt:ymd:0:date_start" type="date" " value="{{ id.date_start | date:"Y-m-d" }}"/>
-    <input name="o.is_going" type="checkbox" value="{{ m.acl.user }}" name="o.is_going" {% if m.edge[id].is_going.[m.acl.user] %}checked{% endif %} />
-</fomr>
+    <input name="title" type="text"
+           value="{{ id.title }}"/>
+    <input name="dt:ymd:0:date_start" type="date" 
+           value="{{ id.date_start | date:"Y-m-d" }}"/>
+    <input name="o.is_going" type="checkbox" 
+           value="{{ m.acl.user }}"
+           {% if m.edge[id].is_going.[m.acl.user] %}checked{% endif %} />
+</form>
 ```
 
 # Delete
 
- 
 ## `delete` postback
 
-| Parameter | Description                                   |
-|-----------|-----------------------------------------------|
-| id        | The id of the resource which must be deleted. |
-|
+| Parameter  | Description                                                            |
+|------------|------------------------------------------------------------------------|
+| id         | The id of the resource which must be deleted.                          |
+| on_success | _Optional_ An action which will be performed after resource is deleted |
 
