@@ -63,7 +63,7 @@ done by using the [escape](https://zotonic.com/docs/1461/escape) filter.
 
 # Update
 
-Resources can be created with the 
+Existing resources can be changed using the update postback.
 
 ## `update` postback
 
