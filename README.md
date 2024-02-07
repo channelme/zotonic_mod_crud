@@ -6,7 +6,7 @@ custom properties. For a web-designer however it is not easy to create and
 modify resources, because it requires knowledge of [Erlang](https://erlang.org),
 the programming language [Zotonic](https://zotonic.com) is written in.
 
-This module makes it possible to savely create, update and delete resources
+This module makes it possible to safely create, update and delete resources
 by using standard web-forms and using zotonic's builtin template language.
 
 # Create
