@@ -26,19 +26,13 @@
 
 -export([event/2]).
 
+%% 
 event(#submit{message={create, Args}}, Context) ->
     {cat, Cat} = proplists:lookup(cat, Args),
     CatId = m_rsc:rid(Cat, Context),
 
-    SafeFormValues = proplists:get_all_values(name, Args),
-    SafeProps = proplists:get_value(props, Args, #{}),
-
-    %% Only get the pre-defined values from the form to prevent accidental insertion
-    %% of values.
-    UnsaveFormValues = z_context:get_q_all_noz(Context),
-    FormValues = lists:filter(fun({K, _}) -> lists:member(K, SafeFormValues) end, UnsaveFormValues),
-
-    Props = make_props(FormValues, SafeProps, Context),
+    FormValues = get_safe_form_values(Args, Context),
+    Props = make_props(FormValues, proplists:get_value(props, Args, #{}), Context),
     Props1 = Props#{ category_id => CatId },
 
     case m_rsc:insert(Props1, Context) of
@@ -56,30 +50,13 @@ event(#submit{message={create, Args}}, Context) ->
 event(#submit{message={update, Args}}, Context) ->
     {id, Id} = proplists:lookup(id, Args),
 
-    SafeFormValues = proplists:get_all_values(name, Args),
-    SafeProps = proplists:get_value(props, Args, #{}),
-
-    %% Only get the pre-defined values from the form to prevent accidental insertion
-    %% of values.
-    UnsaveFormValues = z_context:get_q_all_noz(Context),
-    FormValues = lists:filter(fun({K, _}) -> lists:member(K, SafeFormValues) end, UnsaveFormValues),
-
-    Props = make_props(FormValues, SafeProps, Context),
-    Empty = proplists:get_all_values(unlink_when_empty, Args),
-
-    [
-     begin
-         case proplists:get_value(Key, FormValues, undefined) of
-             V when V =:= undefined orelse V =:= <<>> ->
-                 m_edge:delete(z_convert:to_integer(Edge), Context);
-             _ ->
-                 skip
-         end
-     end || [Key, Edge] <- Empty, Edge =/= undefined
-    ],
+    FormValues = get_safe_form_values(Args, Context),
+    Props = make_props(FormValues, proplists:get_value(props, Args, #{}), Context),
 
     case m_rsc:update(Id, Props, Context) of
         {ok, _} ->
+            empty_unlink(proplists:get_all_values(unlink_when_empty, Args), FormValues, Context),
+
             OnSuccess = proplists:get_all_values(on_success, Args),
             z_render:wire(lists:flatten(OnSuccess), Context);
         {error, Reason} ->
@@ -117,13 +94,28 @@ event(#postback{message={delete, Args}}, Context) ->
 %% Helpers
 %%
 
+% Remove specified edges when a (safe) form-field is empty.
+empty_unlink(WhenEmpty, FormValues, Context) ->
+    [
+     case proplists:get_value(Key, FormValues, undefined) of
+         V when V =:= undefined orelse V =:= <<>> ->
+             _ = m_edge:delete(z_convert:to_integer(Edge), Context);
+         _ ->
+             skip
+     end || [Key, Edge] <- WhenEmpty, Edge =/= undefined
+    ].
+
+% Get safe, pre-defined values from the form. This prevents
+% unsafe addition of attributes to resources.
+get_safe_form_values(Args, Context) ->
+    SafeFormValues = proplists:get_all_values(name, Args),
+    UnsaveFormValues = z_context:get_q_all_noz(Context),
+    lists:filter(fun({K, _}) -> lists:member(K, SafeFormValues) end, UnsaveFormValues).
+
 growl_error(Msg, Context) ->
     z_render:growl_error(Msg, Context).
 
 make_props(FormValues, Props, _Context) ->
-    %% Process the form values, so dates become dt values.
+    %% Process the form values, so dates become date-time values.
     {ok, MapQsProps} = z_props:from_qs(FormValues),
     maps:merge(Props, MapQsProps).
-
-
-
