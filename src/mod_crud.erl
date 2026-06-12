@@ -1,8 +1,8 @@
 %% @author MM Zeeman <maas@channel.me>
-%% @copyright 2024 Maas-Maarten Zeeman
+%% @copyright 2024-2026 Maas-Maarten Zeeman
 %% @doc Easily create, read, update and delete zotonic resources from templates.
 
-%% Copyright 2024 Maas-Maarten Zeeman
+%% Copyright 2024-2026 Maas-Maarten Zeeman
 %%
 %% Licensed under the Apache License, Version 2.0 (the "License");
 %% you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ event(#submit{message={create, Args}}, Context) ->
     CatId = m_rsc:rid(Cat, Context),
 
     FormValues = get_safe_form_values(Args, Context),
+
     Props = make_props(FormValues, proplists:get_value(props, Args, #{}), Context),
     Props1 = Props#{ category_id => CatId },
 
@@ -51,12 +52,12 @@ event(#submit{message={update, Args}}, Context) ->
     {id, Id} = proplists:lookup(id, Args),
 
     FormValues = get_safe_form_values(Args, Context),
+
     Props = make_props(FormValues, proplists:get_value(props, Args, #{}), Context),
 
     case m_rsc:update(Id, Props, Context) of
         {ok, _} ->
             empty_unlink(proplists:get_all_values(unlink_when_empty, Args), FormValues, Context),
-
             OnSuccess = proplists:get_all_values(on_success, Args),
             z_render:wire(lists:flatten(OnSuccess), Context);
         {error, Reason} ->
@@ -110,7 +111,10 @@ empty_unlink(WhenEmpty, FormValues, Context) ->
 get_safe_form_values(Args, Context) ->
     SafeFormValues = proplists:get_all_values(name, Args),
     UnsaveFormValues = z_context:get_q_all_noz(Context),
-    lists:filter(fun({K, _}) -> lists:member(K, SafeFormValues) end, UnsaveFormValues).
+    lists:filter(fun({K, _}) ->
+                         lists:member(K, SafeFormValues)
+                 end,
+                 UnsaveFormValues).
 
 growl_error(Msg, Context) ->
     z_render:growl_error(Msg, Context).
